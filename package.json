@@ -1,0 +1,27 @@
+{
+  "name": "rkit",
+  "version": "0.1.0",
+  "description": "Reactive toolkit",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest --verbose",
+    "test:coverage": "jest --coverage",
+    "build": "npm t && npm run test:coverage && tsc",
+    "prepack": "npm run build"
+  },  
+  "author": "Csaba Sipocz",
+  "repository": {
+    "url": "git+https://github.com/glinto/rkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/glinto/rkit/issues"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.2",
+    "@types/node": "^20.2.5",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.1.3"
+  }
+}
