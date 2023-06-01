@@ -7,7 +7,8 @@
     "test": "jest --verbose",
     "test:coverage": "jest --coverage",
     "build": "npm t && npm run test:coverage && tsc",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "example": "tsc && node dist/examples/basic.js"
   },  
   "author": "Csaba Sipocz",
   "repository": {
