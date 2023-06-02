@@ -71,21 +71,17 @@ export interface PushStream {
 	throws?: Feedable<any>;
 }
 
-export interface StreamOptions {
-	throws?: Feedable<any>;
-}
-
-export interface FeederBehavior<T, O extends StreamOptions> {
-	feeds(target: Feedable<T>, options?: O): PushStream;
+export interface FeederBehavior<T> {
+	feeds(target: Feedable<T>): PushStream;
 }
 
 
 /**
  * The abstract class behind `Feeder` descendant classes
  */
-export abstract class Feeder<T, O extends StreamOptions> implements FeederBehavior<T, O> {
+export abstract class Feeder<T> implements FeederBehavior<T> {
 
-	constructor(protected options?: O) {
+	constructor() {
 	}
 
 	/**
@@ -96,8 +92,8 @@ export abstract class Feeder<T, O extends StreamOptions> implements FeederBehavi
 	 * 
 	 * @returns A `PushStream` which represent the feeding activity
 	 */
-	feeds(target: Feedable<T>, options?: O): PushStream {
-		return this.feed(consumeFunction(target), options ? options : this.options);
+	feeds(target: Feedable<T>): PushStream {
+		return this.feed(consumeFunction(target));
 	}
 
 	protected streamEnabled(s: PushStream): boolean {
@@ -111,9 +107,8 @@ export abstract class Feeder<T, O extends StreamOptions> implements FeederBehavi
 	 * target consumer.
 	 * 
 	 * @param c The `Feedable` consumer function or consumer object instance to which this feeder will feed to 
-	 * @param options An options object for setting up the feed behavior
 	 */
-	protected abstract feed(c: ConsumeFunction<T>, options?: O): PushStream;
+	protected abstract feed(c: ConsumeFunction<T>): PushStream;
 }
 
 export interface TriggeredPushStream extends PushStream {
@@ -129,7 +124,7 @@ export interface TriggeredPushStream extends PushStream {
  * To feed to a Silo's trigger, use the `trigger` property to get a `Feedable`
  * endpoint, like this: `myFeeder.feeds(mySilo.trigger)`
  */
-export class Silo<T> extends Feeder<T, StreamOptions> implements ConsumerBehavior<T> {
+export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
 
 	store: T[] = [];
 
@@ -176,7 +171,7 @@ export class Silo<T> extends Feeder<T, StreamOptions> implements ConsumerBehavio
 /**
  * Options to control `IntervalFeeder` behavior
  */
-export interface IntervalFeederStreamOptions extends StreamOptions {
+export interface IntervalFeederOptions {
 	/**
 	 * The time interval, in milliseconds, between feeds. Default is 1000.
 	 */
@@ -194,15 +189,19 @@ export interface IntervalFeederStreamOptions extends StreamOptions {
 /**
  * Feeds an incremental sequence of numbers at regular intervals. 
  */
-export class IntervalFeeder extends Feeder<number, IntervalFeederStreamOptions> {
+export class IntervalFeeder extends Feeder<number> {
 
 	private intervals: NodeJS.Timer[] = [];
 
-	protected feed(c: ConsumeFunction<number>, options?: IntervalFeederStreamOptions): PushStream {
+	constructor(protected options?: IntervalFeederOptions) {
+		super();
+	}
+
+	protected feed(c: ConsumeFunction<number>): PushStream {
 		let stream: PushStream = {
 			enabled: true
 		};
-		let n = options?.start || 0;
+		let n = this.options?.start || 0;
 		this.intervals.push(
 			setInterval(() => {
 				if (this.streamEnabled(stream)) {
@@ -212,11 +211,11 @@ export class IntervalFeeder extends Feeder<number, IntervalFeederStreamOptions> 
 							consumeFunction(stream.throws)(data);
 						}
 					});
-					n += (options?.increment || 1);
+					n += (this.options?.increment === undefined ? 1 : this.options.increment);
 				}
 
 			},
-				options?.interval || 1000
+				this.options?.interval || 1000
 			)
 		);
 		return stream;
