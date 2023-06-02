@@ -237,12 +237,3 @@ export class Logger<T> extends Consumer<T> {
 		return Promise.resolve();
 	}
 }
-
-export class Transform {
-	static mapTo<T, U>(transformFunction: (data: T) => U, target: Feedable<U>): ConsumeFunction<T> {
-		return (data): Promise<void> => {
-			let transformed = Array.isArray(data) ? data.map(transformFunction) : transformFunction(data);
-			return typeof target === 'function' ? target(transformed) : target.connector(transformed);
-		}
-	}
-}
