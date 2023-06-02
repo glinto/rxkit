@@ -201,7 +201,7 @@ export class IntervalFeeder extends Feeder<number, IntervalFeederStreamOptions> 
 	protected feed(c: ConsumeFunction<number>, options?: IntervalFeederStreamOptions): PushStream {
 		let stream: PushStream = {
 			enabled: true
-		}
+		};
 		let n = options?.start || 0;
 		this.intervals.push(
 			setInterval(() => {
