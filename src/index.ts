@@ -229,11 +229,4 @@ export class IntervalFeeder extends Feeder<number> {
 	}
 }
 
-export class Logger<T> extends Consumer<T> {
-	consume(data: T | T[]): Promise<void> {
-		if ((typeof data === 'number') && (data % 9) === 0)
-			return Promise.reject("9!");
-		console.log(new Date(), 'Logger', data);
-		return Promise.resolve();
-	}
-}
+
