@@ -93,7 +93,7 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	 * @returns A `PushStream` which represent the feeding activity
 	 */
 	feeds(target: Feedable<T>): PushStream {
-		return this.feed(consumeFunction(target));
+		return this.setupFeed(consumeFunction(target));
 	}
 
 	protected streamEnabled(s: PushStream): boolean {
@@ -108,7 +108,7 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	 * 
 	 * @param c The `Feedable` consumer function or consumer object instance to which this feeder will feed to 
 	 */
-	protected abstract feed(c: ConsumeFunction<T>): PushStream;
+	protected abstract setupFeed(c: ConsumeFunction<T>): PushStream;
 }
 
 export interface TriggeredPushStream extends PushStream {
@@ -145,11 +145,11 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
 	}
 
 	override feeds(target: Feedable<T>): TriggeredPushStream {
-		return this.feed(consumeFunction(target));
+		return this.setupFeed(consumeFunction(target));
 	}
 
 
-	protected feed(c: ConsumeFunction<T>): TriggeredPushStream {
+	protected setupFeed(c: ConsumeFunction<T>): TriggeredPushStream {
 		let stream: TriggeredPushStream = {
 			enabled: true,
 			trigger: (): Promise<void> => {
@@ -197,7 +197,7 @@ export class IntervalFeeder extends Feeder<number> {
 		super();
 	}
 
-	protected feed(c: ConsumeFunction<number>): PushStream {
+	protected setupFeed(c: ConsumeFunction<number>): PushStream {
 		let stream: PushStream = {
 			enabled: true
 		};
