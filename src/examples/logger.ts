@@ -10,12 +10,12 @@ export class Logger<T> extends Consumer<T> {
 }
 
 console.log('Start')
-let logger = new Logger<number>();
-let interval = new IntervalFeeder({ interval: 300 });
-let trigger = new IntervalFeeder({ interval: 1000 });
-let silo = new Silo<number>();
+const logger = new Logger<number>();
+const interval = new IntervalFeeder({ interval: 300 });
+const trigger = new IntervalFeeder({ interval: 1000 });
+const silo = new Silo<number>();
 
 interval.feeds(silo);
 interval.feeds(logger).throws = (data) => { console.log(new Date(), `Rejected ${data}`); return Promise.resolve(); }
-let siloStream = silo.feeds(logger);
+const siloStream = silo.feeds(logger);
 trigger.feeds(siloStream.trigger);
