@@ -8,8 +8,9 @@
     "test:coverage": "jest --coverage",
     "build": "npm t && npm run test:coverage && tsc",
     "prepack": "npm run build",
-    "example:logger": "tsc && node dist/examples/logger.js"
-  },  
+    "example:logger": "tsc && node dist/examples/logger.js",
+    "example:iterator": "tsc && node dist/examples/iterator.js"
+  },
   "author": "Csaba Sipocz",
   "repository": {
     "url": "git+https://github.com/glinto/rkit.git"
