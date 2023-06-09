@@ -53,22 +53,43 @@ export abstract class Consumer<T> implements ConsumerBehavior<T> {
 		return this.consume.bind(this);
 	}
 }
+export interface PushStreamLike {
+	enabled: boolean;
+}
 
-export type EnableSwitch = boolean | (() => boolean);
+export class PushStream implements PushStreamLike {
+	protected _enabled?: boolean = true;
 
-export interface PushStream {
-	/**
-	 * A boolean value, or a function which returns a boolean value. 
-	 * If true (or returns true), the feeder will keep feeding data.
-	 * False, on the other hand, means the feeder should temporarily
-	 * not feed the consumer.
-	 */
-	enabled: EnableSwitch;
 	/**
 	 * If specified, data rejected by the consumer will be fed to this
 	 * alternative `Feedable`.
 	 */
 	throws?: Feedable<any>;
+
+	/**
+	 * If defined, this method will be called everytime a PushStream enabled state is changed from false to true
+	 */
+	resume?: () => void = undefined;
+
+	/**
+	 * Specifiec if the feeder is active, i.e. feeds data. Feeder sessions must
+	 * check this value every time before feeding. When a disabled feed is enabled again, 
+	 * the PushStream's `resume()` method will be called
+	 */
+	get enabled(): boolean {
+		return this._enabled || false;
+	}
+
+	set enabled(b: boolean) {
+		if (!this._enabled && b && this.resume) {
+			this._enabled = b;
+			this.resume();
+		}
+		else {
+			this._enabled = b;
+		}
+	}
+
 }
 
 export interface FeederBehavior<T> {
@@ -94,11 +115,6 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	 */
 	feeds(target: Feedable<T>): PushStream {
 		return this.setupFeed(consumeFunction(target));
-	}
-
-	protected streamEnabled(s: PushStream): boolean {
-		if (typeof s.enabled === "boolean") return s.enabled;
-		return s.enabled();
 	}
 
 	/**
@@ -153,7 +169,7 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
 		let stream: TriggeredPushStream = {
 			enabled: true,
 			trigger: (): Promise<void> => {
-				if (this.streamEnabled(stream)) {
+				if (stream.enabled) {
 					let data = this.store;
 					this.store = [];
 					return c(data);
@@ -204,6 +220,7 @@ export class IntervalFeeder extends Feeder<number> {
 		let n = this.options?.start || 0;
 		this.intervals.push(
 			setInterval(() => {
+				if (stream.enabled) {
 				if (this.streamEnabled(stream)) {
 					let data = n;
 					c(data).catch(() => {
