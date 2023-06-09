@@ -64,7 +64,29 @@ export class PushStream implements PushStreamLike {
 	 * If specified, data rejected by the consumer will be fed to this
 	 * alternative `Feedable`.
 	 */
-	throws?: Feedable<any>;
+	throwsToTarget?: Feedable<any>;
+
+	/**
+	 * Factory method to create PushStreams from PushStreamLike objects
+	 * @param s The PushStreamLike object to inherit properties from
+	 * @returns A new PushStream instance
+	 */
+	static from(s: PushStreamLike): PushStream {
+		let ps = new PushStream();
+		ps.enabled = s.enabled;
+		return ps;
+	}
+
+	/**
+	 * Set up an alternate Feedable for redirecting feeds that have been rejected by the primary Feedable target
+	 * 
+	 * @param target The alternate Feedable to feed rejects to
+	 * @returns Itself for chanining purposes
+	 */
+	throwsTo(target: Feedable<any>): this {
+		this.throwsToTarget = target;
+		return this;
+	}
 
 	/**
 	 * If defined, this method will be called everytime a PushStream enabled state is changed from false to true
@@ -143,8 +165,8 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	protected next(data: T | T[], target: ConsumeFunction<T>, stream: PushStream): Promise<void> {
 		return target(data)
 			.catch((reason) => {
-				if (stream.throws !== undefined) {
-					return consumeFunction(stream.throws)(data);
+				if (stream.throwsToTarget !== undefined) {
+					return consumeFunction(stream.throwsToTarget)(data);
 				}
 				else {
 					return Promise.reject(reason);
@@ -153,8 +175,10 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	}
 }
 
-export interface TriggeredPushStream extends PushStream {
-	trigger: ConsumeFunction<any>;
+export class TriggeredPushStream extends PushStream {
+	constructor(public trigger: ConsumeFunction<any>) {
+		super();
+	}
 }
 
 /**
@@ -192,9 +216,8 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
 
 
 	protected setupFeed(c: ConsumeFunction<T>): TriggeredPushStream {
-		let stream: TriggeredPushStream = {
-			enabled: true,
-			trigger: (): Promise<void> => {
+		let stream = new TriggeredPushStream(
+			() => {
 				if (stream.enabled) {
 					let data = this.store;
 					this.store = [];
@@ -205,7 +228,7 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
 				}
 
 			}
-		};
+		);
 		return stream;
 	}
 }
@@ -276,9 +299,7 @@ export class IntervalFeeder extends Feeder<number> {
 	}
 
 	protected setupFeed(c: ConsumeFunction<number>): PushStream {
-		let stream: PushStream = {
-			enabled: true
-		};
+		let stream = new PushStream();
 		let n = this.options?.start || 0;
 		this.intervals.push(
 			setInterval(() => {

@@ -16,6 +16,10 @@ const trigger = new IntervalFeeder({ interval: 1000 });
 const silo = new Silo<number>();
 
 interval.feeds(silo);
-interval.feeds(logger).throws = (data) => { console.log(new Date(), `Rejected ${data}`); return Promise.resolve(); }
+interval.feeds(logger).throwsTo(
+	(data) => {
+		console.log(new Date(), `Rejected ${data}`); return Promise.resolve();
+	}
+);
 const siloStream = silo.feeds(logger);
 trigger.feeds(siloStream.trigger);
