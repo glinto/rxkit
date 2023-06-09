@@ -304,12 +304,15 @@ export class IntervalFeeder extends Feeder<number> {
 		this.intervals.push(
 			setInterval(() => {
 				if (stream.enabled) {
+					// temporarily disable the stream to handle slow backpressuring consumers
+					stream.enabled = false;
 					this.next(n, c, stream)
 						.catch(() => {
 							// Lose the data if target (and alternate Feedable) rejected
 						})
 						.finally(() => {
 							n += (this.options?.increment === undefined ? 1 : this.options.increment);
+							stream.enabled = true;
 						});
 				}
 			},
