@@ -1,25 +1,30 @@
-import { Consumer, IntervalFeeder, Silo } from "..";
+import { Consumer, IntervalFeeder } from "..";
 
-export class Logger<T> extends Consumer<T> {
-	consume(data: T | T[]): Promise<void> {
+const baseTime = Date.now();
+
+export class SlowLogger extends Consumer<number> {
+	consume(data: number | number[]): Promise<void> {
 		if ((typeof data === 'number') && (data % 9) === 0)
 			return Promise.reject("9!");
-		console.log(new Date(), 'Logger', data);
-		return Promise.resolve();
+		return new Promise(resolve => {
+			setTimeout(() => {
+				console.log(Date.now() - baseTime, 'Logger', data);
+				resolve();
+			}, 500);
+		});
+
 	}
 }
 
 console.log('Start')
-const logger = new Logger<number>();
+// Logs the data slowly. One feed takes 500ms to process and resolve. Rejects are immediate.
+const logger = new SlowLogger();
+// The interval feeder wants to feed every 300 ms, but backpressuring kicks in, and 
+// feed will eventually happen every 500-800 ms
 const interval = new IntervalFeeder({ interval: 300 });
-const trigger = new IntervalFeeder({ interval: 1000 });
-const silo = new Silo<number>();
 
-interval.feeds(silo);
 interval.feeds(logger).throwsTo(
 	(data) => {
-		console.log(new Date(), `Rejected ${data}`); return Promise.resolve();
+		console.log(Date.now() - baseTime, `Rejected ${data}`); return Promise.resolve();
 	}
 );
-const siloStream = silo.feeds(logger);
-trigger.feeds(siloStream.trigger);
