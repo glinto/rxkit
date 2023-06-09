@@ -125,6 +125,32 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	 * @param c The `Feedable` consumer function or consumer object instance to which this feeder will feed to 
 	 */
 	protected abstract setupFeed(c: ConsumeFunction<T>): PushStream;
+
+	/**
+	 * Implements some common logic for all Feeder descendant classes. 
+	 * Attempts to feed one piece (or a set) of data to a consumer target. If the consumer rejects and the PushStream
+	 * has defined an alternate `Feedable` in its `throws` property, then a second attempt is made to feed it to that
+	 * `Feedable`. The feed is considered successful if either the consumer target or the alternate `Feedable` resolves.
+	 * 
+	 * It is important for descendant classes to handle unsuccessful feed attempts, because it means the data went 
+	 * nowhere. It is then at the descendant class's discretion what to do with rejected data.
+	 * 
+	 * @param data The data to be fed
+	 * @param target The target `ConsumeFunction` to receive the data
+	 * @param stream The PushStream in which the feed attempt happens
+	 * @returns A Promise which resolves if the feed was successful or rejects if it wasn't
+	 */
+	protected next(data: T | T[], target: ConsumeFunction<T>, stream: PushStream): Promise<void> {
+		return target(data)
+			.catch((reason) => {
+				if (stream.throws !== undefined) {
+					return consumeFunction(stream.throws)(data);
+				}
+				else {
+					return Promise.reject(reason);
+				}
+			})
+	}
 }
 
 export interface TriggeredPushStream extends PushStream {
@@ -221,16 +247,14 @@ export class IntervalFeeder extends Feeder<number> {
 		this.intervals.push(
 			setInterval(() => {
 				if (stream.enabled) {
-				if (this.streamEnabled(stream)) {
-					let data = n;
-					c(data).catch(() => {
-						if (stream.throws !== undefined) {
-							consumeFunction(stream.throws)(data);
-						}
-					});
+					this.next(n, c, stream)
+						.catch(() => {
+							// Lose the data if target (and alternate Feedable) rejected
+						})
+						.finally(() => {
 					n += (this.options?.increment === undefined ? 1 : this.options.increment);
+						});
 				}
-
 			},
 				this.options?.interval || 1000
 			)
