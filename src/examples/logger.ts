@@ -1,18 +1,14 @@
+import { setTimeout } from "timers/promises";
 import { Consumer, IntervalFeeder } from "..";
 
 const baseTime = Date.now();
 
 export class SlowLogger extends Consumer<number> {
-	consume(data: number | number[]): Promise<void> {
+	async consume(data: number | number[]): Promise<void> {
 		if ((typeof data === 'number') && (data % 9) === 0)
 			return Promise.reject("9!");
-		return new Promise(resolve => {
-			setTimeout(() => {
-				console.log(Date.now() - baseTime, 'Logger', data);
-				resolve();
-			}, 500);
-		});
-
+		await setTimeout(500);
+		console.log(Date.now() - baseTime, 'Logger', data);
 	}
 }
 
