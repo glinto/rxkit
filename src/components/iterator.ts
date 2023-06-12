@@ -32,6 +32,4 @@ export class IteratorFeeder<T> extends Feeder<T> {
             stream.enabled = false;
         }
     }
-
-
 }
