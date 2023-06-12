@@ -72,4 +72,24 @@ describe('IntervalFeeder', () => {
                 f.stop();
             });
     });
+
+    it('Discard unsuccessful feed', () => {
+        let fn = jest.fn();
+        let c: ConsumeFunction<number> = (n) => {
+            fn(n);
+            if (n !== 14) return Promise.resolve();
+            return Promise.reject(13);
+        };
+        const f = new IntervalFeeder({ interval: 20, start: 13 });
+        f.feeds(c);
+
+        return setTimeout(70)
+            .then(() => {
+                f.stop();
+                expect(fn).toBeCalledTimes(3);
+                expect(fn).toHaveBeenNthCalledWith(1, 13);
+                expect(fn).toHaveBeenNthCalledWith(2, 14);
+                expect(fn).toHaveBeenNthCalledWith(3, 15);
+            });
+    });
 });
