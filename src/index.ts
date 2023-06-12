@@ -30,7 +30,7 @@ export interface ConsumerBehavior<T> {
  */
 export type Feedable<T> = ConsumerBehavior<T> | ConsumeFunction<T>;
 
-function consumeFunction<T>(f: Feedable<T>): ConsumeFunction<T> {
+export function consumeFunction<T>(f: Feedable<T>): ConsumeFunction<T> {
 	if (typeof f === "function")
 		return f;
 	else
@@ -58,24 +58,13 @@ export interface PushStreamLike {
 }
 
 export class PushStream implements PushStreamLike {
-	protected _enabled?: boolean = true;
+	protected _enabled: boolean = true;
 
 	/**
 	 * If specified, data rejected by the consumer will be fed to this
 	 * alternative `Feedable`.
 	 */
 	throwsToTarget?: Feedable<any>;
-
-	/**
-	 * Factory method to create PushStreams from PushStreamLike objects
-	 * @param s The PushStreamLike object to inherit properties from
-	 * @returns A new PushStream instance
-	 */
-	static from(s: PushStreamLike): PushStream {
-		let ps = new PushStream();
-		ps.enabled = s.enabled;
-		return ps;
-	}
 
 	/**
 	 * Set up an alternate Feedable for redirecting feeds that have been rejected by the primary Feedable target
@@ -99,7 +88,7 @@ export class PushStream implements PushStreamLike {
 	 * the PushStream's `resume()` method will be called
 	 */
 	get enabled(): boolean {
-		return this._enabled || false;
+		return this._enabled;
 	}
 
 	set enabled(b: boolean) {
