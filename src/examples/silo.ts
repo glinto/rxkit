@@ -1,4 +1,6 @@
-import { Consumer, IntervalFeeder, Silo } from "..";
+import { Consumer } from "..";
+import { IntervalFeeder } from "../components/interval";
+import { Silo } from "../components/silo";
 
 export class Logger<T> extends Consumer<T> {
 	consume(data: T | T[]): Promise<void> {

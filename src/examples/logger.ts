@@ -1,5 +1,6 @@
 import { setTimeout } from "timers/promises";
-import { Consumer, IntervalFeeder } from "..";
+import { Consumer } from "..";
+import { IntervalFeeder } from "../components/interval";
 
 const baseTime = Date.now();
 
