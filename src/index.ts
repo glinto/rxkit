@@ -164,3 +164,4 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	}
 }
 
+export { IntervalFeeder, IntervalFeederOptions } from './components/interval';
