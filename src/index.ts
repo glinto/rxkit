@@ -30,13 +30,6 @@ export interface ConsumerBehavior<T> {
  */
 export type Feedable<T> = ConsumerBehavior<T> | ConsumeFunction<T>;
 
-export function consumeFunction<T>(f: Feedable<T>): ConsumeFunction<T> {
-	if (typeof f === "function")
-		return f;
-	else
-		return f.connector;
-}
-
 /**
  * The abstract class behind every `Consumer` descendant.
  */
@@ -116,6 +109,13 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	constructor() {
 	}
 
+	static getConsumeFunction<T>(f: Feedable<T>): ConsumeFunction<T> {
+		if (typeof f === "function")
+			return f;
+		else
+			return f.connector;
+	}
+
 	/**
 	 * Sets up a feed to a specific `Consumer`
 	 * 
@@ -125,7 +125,7 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	 * @returns A `PushStream` which represent the feeding activity
 	 */
 	feeds(target: Feedable<T>): PushStream {
-		return this.setupFeed(consumeFunction(target));
+		return this.setupFeed(Feeder.getConsumeFunction(target));
 	}
 
 	/**
@@ -155,7 +155,7 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 		return target(data)
 			.catch((reason) => {
 				if (stream.throwsToTarget !== undefined) {
-					return consumeFunction(stream.throwsToTarget)(data);
+					return Feeder.getConsumeFunction(stream.throwsToTarget)(data);
 				}
 				else {
 					return Promise.reject(reason);

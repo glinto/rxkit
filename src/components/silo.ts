@@ -1,4 +1,4 @@
-import { PushStream, ConsumeFunction, Feeder, ConsumerBehavior, Feedable, consumeFunction } from "..";
+import { PushStream, ConsumeFunction, Feeder, ConsumerBehavior, Feedable } from "..";
 
 export class TriggeredPushStream extends PushStream {
     constructor(public trigger: ConsumeFunction<any>) {
@@ -36,7 +36,7 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
     }
 
     override feeds(target: Feedable<T>): TriggeredPushStream {
-        return this.setupFeed(consumeFunction(target));
+        return this.setupFeed(Feeder.getConsumeFunction(target));
     }
 
 
