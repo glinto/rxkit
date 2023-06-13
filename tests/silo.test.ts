@@ -101,5 +101,25 @@ describe('Silo', () => {
             });
     });
 
+    it('Dont release empty store', () => {
+        let fn = jest.fn();
+        let c: ConsumeFunction<number> = (n) => {
+            fn(n);
+            return Promise.resolve();
+        };
+        const f = new SimpleFeeder([]);
+        const s = new Silo<number>();
+        const stream = s.feeds(c);
+        f.feeds(s);
+        new SimpleFeeder(0).feeds(stream.trigger);
+
+        return setTimeout(20)
+            .then(() => {
+                // Silo did not attempt to release
+                expect(fn).toBeCalledTimes(0);
+                expect(s.store.length).toBe(0);
+            });
+    });
+
 
 });
