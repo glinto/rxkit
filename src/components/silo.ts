@@ -44,12 +44,15 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
         let stream: TriggeredPushStream = new TriggeredPushStream(
             () => this.release(c, stream)
         );
+        stream.resume = () => {
+            this.release(c, stream)
+        };
         return stream;
     }
 
     protected release(c: ConsumeFunction<T>, stream: TriggeredPushStream): Promise<void> {
-                if (stream.enabled) {
-                    let data = this.store;
+        if (stream.enabled) {
+            let data = this.store;
             return this.next(data, c, stream)
                 .then(() => {
                     // only empty the store if the feed was successful
@@ -58,9 +61,9 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
                 .catch(() => {
                     // Do nothing
                 });
-                }
-                else {
-                    return Promise.resolve();
-                }
+        }
+        else {
+            return Promise.resolve();
+        }
     }
 }
