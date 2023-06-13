@@ -2,11 +2,11 @@
 Reactive toolkit
 
 ## Basic concept
-The fundamental mechanism is Feeders feeding to Feedable targets. A Feedable can be fed with any number of data for as
+The fundamental mechanism is `Feeders` feeding to `Feedable` targets. A Feedable can be fed with any number of data for as
 long as needed. For every feed operation, Feedables return a Promise which resolves if the feed was successful or
 rejects if it was not.
 
-A feeding session in which a Feeder feeds a Feedable is a PushStream.
+A feeding session in which a `Feeder` feeds a `Feedable` is a `PushStream`.
 
 ## Feedables
 The reactive push concept demands that Feedables have no control over when they are fed to. If they receive a feed, they
