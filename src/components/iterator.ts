@@ -8,9 +8,9 @@ export class IteratorFeeder<T> extends Feeder<T> {
 
     protected override setupFeed(c: ConsumeFunction<T>): PushStream {
         let stream = new PushStream();
-        this.iterate(stream, c);
+        setImmediate(() => this.iterate(stream, c));
         stream.resume = () => {
-            this.iterate(stream, c);
+            setImmediate(() => this.iterate(stream, c));
         };
         return stream;
     }
