@@ -10,7 +10,8 @@
     "prepack": "npm run build",
     "example:logger": "tsc && node dist/examples/logger.js",
     "example:silo": "tsc && node dist/examples/silo.js",
-    "example:iterator": "tsc && node dist/examples/iterator.js"
+    "example:iterator": "tsc && node dist/examples/iterator.js",
+    "example:transformer": "tsc && node dist/examples/transformer.js"
   },
   "author": "Csaba Sipocz",
   "repository": {
