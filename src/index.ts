@@ -46,11 +46,8 @@ export abstract class Consumer<T> implements ConsumerBehavior<T> {
 		return this.consume.bind(this);
 	}
 }
-export interface PushStreamLike {
-	enabled: boolean;
-}
 
-export class PushStream implements PushStreamLike {
+export class PushStream {
 	protected _enabled: boolean = true;
 
 	/**
@@ -96,10 +93,33 @@ export class PushStream implements PushStreamLike {
 
 }
 
+
+export interface TriggerableStream {
+	trigger: ConsumeFunction<any>;
+}
+
+/**
+ * Triggered push streams define a trigger function which to which data can be fed.
+ * Feeders which set up a TriggeredPushStream will be 'triggered'
+ * when any data (trigger signal) arrives to the trigger), i.e. they will push one data
+ * package on each received trigger signal
+ */
+export class TriggeredPushStream extends PushStream implements TriggerableStream {
+
+	/**
+	 * The Feedable endpoint which will trigger the stream when it is fed to.
+	 */
+	trigger: ConsumeFunction<any>;
+
+	constructor(trigger: ConsumeFunction<any>) {
+		super();
+		this.trigger = trigger;
+	}
+}
+
 export interface FeederBehavior<T> {
 	feeds(target: Feedable<T>): PushStream;
 }
-
 
 /**
  * The abstract class behind `Feeder` descendant classes
@@ -127,6 +147,18 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	feeds(target: Feedable<T>): PushStream {
 		return this.setupFeed(Feeder.getConsumeFunction(target));
 	}
+
+	/**
+	 * Sets up a feed to to another triggerable `PushStream`
+	 * 
+	 * @param stream The triggerable PushStream to which this feeder will feed to. 
+	 * 
+	 * @returns A `PushStream` which represent the feeding activity
+	 */
+	triggers(stream: TriggerableStream): PushStream {
+		return this.setupFeed(stream.trigger);
+	}
+
 
 	/**
 	 * This function must be implemented in descendant classes of `Feeder`. It needs to set up
@@ -166,4 +198,4 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 
 export { IntervalFeeder, IntervalFeederOptions } from './components/interval';
 export { IteratorFeeder } from './components/iterator';
-export { Silo, TriggeredPushStream } from './components/silo';
+export { Silo } from './components/silo';

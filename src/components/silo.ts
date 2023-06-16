@@ -1,10 +1,6 @@
-import { PushStream, ConsumeFunction, Feeder, ConsumerBehavior, Feedable } from "..";
+import { PushStream, ConsumeFunction, Feeder, ConsumerBehavior, TriggeredPushStream, Feedable } from "..";
 
-export class TriggeredPushStream extends PushStream {
-    constructor(public trigger: ConsumeFunction<any>) {
-        super();
-    }
-}
+
 
 /**
  * A `Silo` acts like a holding tank which consumes data, stores it and
@@ -35,11 +31,6 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
         return this.consume.bind(this);
     }
 
-    override feeds(target: Feedable<T>): TriggeredPushStream {
-        return this.setupFeed(Feeder.getConsumeFunction(target));
-    }
-
-
     protected setupFeed(c: ConsumeFunction<T>): TriggeredPushStream {
         let stream: TriggeredPushStream = new TriggeredPushStream(
             () => this.release(c, stream)
@@ -50,7 +41,11 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
         return stream;
     }
 
-    protected release(c: ConsumeFunction<T>, stream: TriggeredPushStream): Promise<void> {
+    override feeds(target: Feedable<T>): TriggeredPushStream {
+        return this.setupFeed(Feeder.getConsumeFunction(target));
+    }
+
+    protected release(c: ConsumeFunction<T>, stream: PushStream): Promise<void> {
         if (stream.enabled && this.store.length > 0) {
             let data = this.store;
             return this.next(data, c, stream)

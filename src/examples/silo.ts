@@ -20,5 +20,5 @@ fastInterval.feeds(silo);
 // The silo, when triggered, will feed the logger
 const siloStream = silo.feeds(logger);
 // The silo's trigger will be fed every 1000ms
-slowInterval.feeds(siloStream.trigger);
+slowInterval.triggers(siloStream);
 

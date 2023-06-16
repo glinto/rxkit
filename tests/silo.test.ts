@@ -40,7 +40,7 @@ describe('Silo', () => {
                 expect(fn).toBeCalledTimes(0);
                 expect(s.store.length).toBe(4);
 
-                new SimpleFeeder(0).feeds(stream.trigger);
+                new SimpleFeeder(0).triggers(stream);
             })
             .then(() => setTimeout(20))
             .then(() => {
@@ -60,7 +60,7 @@ describe('Silo', () => {
         const s = new Silo<number>();
         const stream = s.feeds(c);
         f.feeds(s);
-        new SimpleFeeder(0).feeds(stream.trigger);
+        new SimpleFeeder(0).triggers(stream);
 
         return setTimeout(20)
             .then(() => {
@@ -82,7 +82,7 @@ describe('Silo', () => {
         const stream = s.feeds(c);
         stream.enabled = false;
         f.feeds(s);
-        new SimpleFeeder(0).feeds(stream.trigger);
+        new SimpleFeeder(0).triggers(stream);
 
         return setTimeout(20)
             .then(() => {
@@ -111,7 +111,7 @@ describe('Silo', () => {
         const s = new Silo<number>();
         const stream = s.feeds(c);
         f.feeds(s);
-        new SimpleFeeder(0).feeds(stream.trigger);
+        new SimpleFeeder(0).triggers(stream);
 
         return setTimeout(20)
             .then(() => {
