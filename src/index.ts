@@ -199,3 +199,4 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 export { IntervalFeeder, IntervalFeederOptions } from './components/interval';
 export { IteratorFeeder } from './components/iterator';
 export { Silo } from './components/silo';
+export { Transformer } from './components/transformer';

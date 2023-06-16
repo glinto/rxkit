@@ -15,8 +15,10 @@ export class Transformer<I, O> extends Feeder<O> implements ConsumerBehavior<I> 
     }
 
     consume(data: I | I[]): Promise<void> {
-        if (this.forwardFeed === undefined) return Promise.reject();
-        if (!this.forwardFeed.stream.enabled) return Promise.reject();
+        if (this.forwardFeed === undefined)
+            return Promise.reject();
+        if (!this.forwardFeed.stream.enabled)
+            return Promise.reject();
         if (Array.isArray(data)) {
             return this.next(data.map(value => this.transformFn(value)), this.forwardFeed.c, this.forwardFeed.stream);
         }
