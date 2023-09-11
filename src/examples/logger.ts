@@ -13,15 +13,19 @@ export class SlowLogger extends Consumer<number> {
 	}
 }
 
-console.log('Start')
+console.log('Start');
+
 // Logs the data slowly. One feed takes 500ms to process and resolve. Rejects are immediate.
 const logger = new SlowLogger();
+
 // The interval feeder wants to feed every 300 ms, but backpressuring kicks in, and 
 // feed will eventually happen every 500-800 ms
 const interval = new IntervalFeeder({ interval: 300 });
 
-interval.feeds(logger).throwsTo(
-	(data) => {
-		console.log(Date.now() - baseTime, `Rejected ${data}`); return Promise.resolve();
-	}
-);
+interval
+	.feeds(logger)
+	.throwsTo(
+		(data) => {
+			console.log(Date.now() - baseTime, `Rejected ${data}`); return Promise.resolve();
+		}
+	);
