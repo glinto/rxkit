@@ -29,5 +29,7 @@ const consumerE: ConsumeFunction<number> = (n) => {
 }
 
 const iter = new Array(10).fill(0).map((_value, index) => index).values();
-const f = new IteratorFeeder(iter);
-f.feeds(consumer).throwsTo(consumerE);
+
+new IteratorFeeder(iter)
+	.feeds(consumer)
+	.throwsTo(consumerE);
