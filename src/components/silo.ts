@@ -1,4 +1,4 @@
-import { PushStream, ConsumeFunction, Feeder, ConsumerBehavior, TriggeredPushStream, Feedable } from "..";
+import { PushStream, ConsumeFunction, Feeder, ConsumerBehavior } from "..";
 
 
 
@@ -31,18 +31,13 @@ export class Silo<T> extends Feeder<T> implements ConsumerBehavior<T> {
         return this.consume.bind(this);
     }
 
-    protected setupFeed(c: ConsumeFunction<T>): TriggeredPushStream {
-        let stream: TriggeredPushStream = new TriggeredPushStream(
-            () => this.release(c, stream)
-        );
+    protected setupFeed(c: ConsumeFunction<T>): PushStream {
+        let stream: PushStream = new PushStream();
+        stream.trigger = () => this.release(c, stream);
         stream.resume = () => {
             this.release(c, stream)
         };
         return stream;
-    }
-
-    override feeds(target: Feedable<T>): TriggeredPushStream {
-        return this.setupFeed(Feeder.getConsumeFunction(target));
     }
 
     protected release(c: ConsumeFunction<T>, stream: PushStream): Promise<void> {

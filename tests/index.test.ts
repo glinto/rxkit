@@ -150,4 +150,12 @@ describe('PushStream', () => {
 		p.enabled = true;
 		expect(fn).toBeCalledTimes(1);
 	});
+	it('Trigger', () => {
+		let p = new PushStream();
+		let f = new SimpleFeeder(1);
+		let fn = () => {
+			f.triggers(p);
+		};;
+		expect(fn).toThrow('SimpleFeeder: PushStream is not triggerable');
+	});
 }); 

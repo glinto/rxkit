@@ -73,6 +73,11 @@ export class PushStream {
 	resume?: () => void = undefined;
 
 	/**
+	 * An optional Feedable endpoint which will trigger the stream when it is fed to.
+	 */
+	trigger?: ConsumeFunction<any>;
+
+	/**
 	 * Specifiec if the feeder is active, i.e. feeds data. Feeder sessions must
 	 * check this value every time before feeding. When a disabled feed is enabled again, 
 	 * the PushStream's `resume()` method will be called
@@ -91,30 +96,6 @@ export class PushStream {
 		}
 	}
 
-}
-
-
-export interface TriggerableStream {
-	trigger: ConsumeFunction<any>;
-}
-
-/**
- * Triggered push streams define a trigger function which to which data can be fed.
- * Feeders which set up a TriggeredPushStream will be 'triggered'
- * when any data (trigger signal) arrives to the trigger), i.e. they will push one data
- * package on each received trigger signal
- */
-export class TriggeredPushStream extends PushStream implements TriggerableStream {
-
-	/**
-	 * The Feedable endpoint which will trigger the stream when it is fed to.
-	 */
-	trigger: ConsumeFunction<any>;
-
-	constructor(trigger: ConsumeFunction<any>) {
-		super();
-		this.trigger = trigger;
-	}
 }
 
 export interface FeederBehavior<T> {
@@ -155,7 +136,9 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 	 * 
 	 * @returns A `PushStream` which represent the feeding activity
 	 */
-	triggers(stream: TriggerableStream): PushStream {
+	triggers(stream: PushStream): PushStream {
+		if (stream.trigger === undefined)
+			throw (`${this.constructor.name}: PushStream is not triggerable`);
 		return this.setupFeed(stream.trigger);
 	}
 
