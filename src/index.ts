@@ -102,6 +102,8 @@ export interface FeederBehavior<T> {
 	feeds(target: Feedable<T>): PushStream;
 }
 
+export interface PipeBehavior<I, O> extends ConsumerBehavior<I>, FeederBehavior<O> { }
+
 /**
  * The abstract class behind `Feeder` descendant classes
  */
@@ -142,6 +144,15 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 		return this.setupFeed(stream.trigger);
 	}
 
+	/**
+	 * Create a Pipe with this feeder as the first item in the chain
+	 * 
+	 * @param target The target in the pipe which this feeder will feed to
+	 * @returns A newly created pipe with this feeder and the target chained together
+	 */
+	pipe<P>(target: PipeBehavior<T, P>): Pipe<T, P> {
+		return new Pipe(this.feeds(target), target);
+	}
 
 	/**
 	 * This function must be implemented in descendant classes of `Feeder`. It needs to set up
@@ -177,6 +188,64 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
 				}
 			})
 	}
+}
+
+/**
+ * A Pipe is a chain of items where each item feeds the next one in the chain. For this reason, every member implements
+ * both Feeder and Consumer behaviors. The Pipe is a powerful structure which can be built and extended in a chained
+ * programming style.
+ * 
+ * Pipes are partly immutable in a way, that they only hold reference to the last item in the queue,
+ * and to the PushStream which feeds to it. Even though Pipes can be extended by adding items at the end, this
+ * extension is achieved by creating a new pipe with the new member at the end.
+ */
+export class Pipe<I, O> {
+	constructor(public stream: PushStream, public readonly feeder: PipeBehavior<I, O>) {
+	}
+
+	/**
+	 * Add a new item at the end of the Pipe
+	 * @param target The new member to extend the Pipe with
+	 * @returns A new Pipe extended with the new member
+	 */
+	pipe<P>(target: PipeBehavior<O, P>): Pipe<O, P> {
+		return new Pipe<O, P>(this.feeder.feeds(target), target);
+	}
+
+	/**
+	 * Stream the output of the pipe to a Feedable target.
+	 * 
+	 * @param target The target to feed to pipe output to
+	 * @returns The pipe itself for chaining purposes
+	 */
+	out(target: Feedable<O>): this {
+		this.stream = this.feeder.feeds(target);
+		return this;
+	}
+
+	/**
+	 * Sets up a trigger source for the last PushStream in the pipe (the feeding contract
+	 * between the last item in the pipe and the one before it)
+	 * 
+	 * @param source The Feeder which will act as the trigger source
+	 * @returns The pipe itself for chaining purposes
+	 */
+	triggeredWith(source: FeederBehavior<I>): this {
+		if (this.stream.trigger === undefined) throw (`Stream is not triggerable`);
+		source.feeds(this.stream.trigger);
+		return this;
+	}
+
+	/**
+	 * Feed rejections of the last PushStream to an alternate target
+	 * @param target The target to feed rejections to
+	 * @returns The pipe itself for chaining purposes
+	 */
+	throwsTo(target: Feedable<O>): this {
+		this.stream.throwsTo(target);
+		return this;
+	}
+
 }
 
 export { IntervalFeeder, IntervalFeederOptions } from './components/interval';
