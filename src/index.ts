@@ -197,7 +197,7 @@ export abstract class Feeder<T> implements FeederBehavior<T> {
  * 
  * Pipes are partly immutable in a way, that they only hold reference to the last item in the queue,
  * and to the PushStream which feeds to it. Even though Pipes can be extended by adding items at the end, this
- * extension is achieved by creating a new pipe with the new member at the end.
+ * extension is achieved by creating a new pipe with the new member as last in queue.
  */
 export class Pipe<I, O> {
 	constructor(public stream: PushStream, public readonly feeder: PipeBehavior<I, O>) {
@@ -230,7 +230,7 @@ export class Pipe<I, O> {
 	 * @param source The Feeder which will act as the trigger source
 	 * @returns The pipe itself for chaining purposes
 	 */
-	triggeredWith(source: FeederBehavior<I>): this {
+	triggeredWith(source: FeederBehavior<any>): this {
 		if (this.stream.trigger === undefined) throw (`Stream is not triggerable`);
 		source.feeds(this.stream.trigger);
 		return this;
@@ -252,3 +252,4 @@ export { IntervalFeeder, IntervalFeederOptions } from './components/interval';
 export { IteratorFeeder } from './components/iterator';
 export { Silo } from './components/silo';
 export { Transformer } from './components/transformer';
+export { Aggregator } from './components/aggregator'
