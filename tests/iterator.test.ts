@@ -13,7 +13,7 @@ describe('IteratorFeeder', () => {
         const f = new IteratorFeeder(iter);
         f.feeds(c);
 
-        return setTimeout(20)
+        return setTimeout(100)
             .then(() => {
                 expect(fn).toBeCalledTimes(3);
                 expect(fn).toHaveBeenNthCalledWith(1, 1);

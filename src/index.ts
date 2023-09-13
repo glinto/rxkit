@@ -252,4 +252,4 @@ export { IntervalFeeder, IntervalFeederOptions } from './components/interval';
 export { IteratorFeeder } from './components/iterator';
 export { Silo } from './components/silo';
 export { Transformer } from './components/transformer';
-export { Aggregator } from './components/aggregator'
+export { Aggregator, AggregatorFunction } from './components/aggregator'

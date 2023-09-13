@@ -1,5 +1,5 @@
 import { setTimeout } from 'timers/promises';
-import { ConsumeFunction, Consumer, Feeder, PushStream } from '../src/index';
+import { ConsumeFunction, Consumer, Feeder, PushStream, Silo, Transformer } from '../src/index';
 
 function getResultMocks() {
 	return {
@@ -17,13 +17,15 @@ class SimpleFeeder extends Feeder<number> {
 
 	protected setupFeed(c: ConsumeFunction<number>): PushStream {
 		let s = new PushStream();
-		this.next(this.data, c, s)
-			.then(() => {
-				if (this.success !== undefined) this.success(this.data);
-			})
-			.catch(() => {
-				if (this.failure !== undefined) this.failure(this.data);
-			})
+		setImmediate(() => {
+			this.next(this.data, c, s)
+				.then(() => {
+					if (this.success !== undefined) this.success(this.data);
+				})
+				.catch(() => {
+					if (this.failure !== undefined) this.failure(this.data);
+				})
+		});
 		return s;
 	}
 }
@@ -126,8 +128,12 @@ describe('Simple consumer', () => {
 		let fn = jest.fn();
 		const TEST_VALUE = 98;
 		new SimpleFeeder(TEST_VALUE).feeds(new SimpleConsumer(fn));
-		expect(fn).toBeCalledTimes(1);
-		expect(fn).toBeCalledWith(TEST_VALUE);
+		return setTimeout(50)
+			.then(() => {
+				expect(fn).toBeCalledTimes(1);
+				expect(fn).toBeCalledWith(TEST_VALUE);
+			});
+
 	})
 });
 
@@ -158,4 +164,84 @@ describe('PushStream', () => {
 		};;
 		expect(fn).toThrow('SimpleFeeder: PushStream is not triggerable');
 	});
-}); 
+});
+
+describe('Pipes', () => {
+	//
+
+	it('Creation', () => {
+		let t = new Transformer<number, number>((i) => 255 - i);
+		let feeder = new SimpleFeeder(33);
+		let pipe = feeder.pipe(t);
+		expect(pipe.feeder).toBe(t);
+	});
+
+	it('Feed and output', () => {
+		let t = new Transformer<number, number>((i) => 255 - i);
+		let t2 = new Transformer<number, number>((i) => i * 10);
+		let fn = jest.fn();
+		new SimpleFeeder(55)
+			.pipe(t)
+			.pipe(t2)
+			.out((data: number | number[]) => {
+				fn(data);
+				return Promise.resolve();
+			});
+		return setTimeout(50)
+			.then(() => {
+				expect(fn).toBeCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(2000);
+			});
+	});
+
+	it('Throwing', () => {
+		let t = new Transformer<number, number>((i) => 255 - i);
+		let fn = jest.fn();
+		new SimpleFeeder(200)
+			.pipe(t)
+			.out(() => {
+				return Promise.reject();
+			})
+			.throwsTo((data: number | number[]) => {
+				fn(data);
+				return Promise.resolve();
+			});
+		return setTimeout(50)
+			.then(() => {
+				expect(fn).toBeCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(55);
+			});
+	});
+
+	it('Triggering', () => {
+		let fn = jest.fn();
+		new SimpleFeeder(131)
+			.pipe(new Silo())
+			.out((data) => {
+				fn(data);
+				return Promise.resolve();
+			})
+			.triggeredWith(new SimpleFeeder(0))
+		return setTimeout(50)
+			.then(() => {
+				expect(fn).toBeCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith([131]);
+			});
+	});
+
+	it('Triggering error', () => {
+		let t = new Transformer<number, number>((i) => 255 - i);
+		let fn = jest.fn();
+		let fnerr = () => {
+			new SimpleFeeder(155)
+				.pipe(t)
+				.out((data) => {
+					fn(data);
+					return Promise.resolve();
+				})
+				.triggeredWith(new SimpleFeeder(0))
+		};
+		expect(fnerr).toThrow('Stream is not triggerable');
+	});
+
+});
