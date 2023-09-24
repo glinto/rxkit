@@ -15,10 +15,10 @@
   },
   "author": "Csaba Sipocz",
   "repository": {
-    "url": "git+https://github.com/glinto/rkit.git"
+    "url": "git+https://github.com/glinto/rxkit.git"
   },
   "bugs": {
-    "url": "https://github.com/glinto/rkit/issues"
+    "url": "https://github.com/glinto/rxkit/issues"
   },
   "license": "MIT",
   "devDependencies": {
