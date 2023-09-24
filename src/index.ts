@@ -47,6 +47,10 @@ export abstract class Consumer<T> implements ConsumerBehavior<T> {
 	}
 }
 
+/**
+ * A PushStream is a streaming session between a feeder and a consumer. 
+ * Everytime a Feeder starts a new feed, it creates a PushStream session.
+ */
 export class PushStream {
 	protected _enabled: boolean = true;
 
