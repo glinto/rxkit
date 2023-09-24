@@ -1,5 +1,9 @@
 import { Feeder, ConsumeFunction, PushStream } from "..";
 
+/**
+ * The IteratorFeeder feeds data from an Iterable source. IteratorFeeders can be back pressured,
+ * as with every iteration, they will wait for the previous feed to complete (resolve or reject).
+ */
 export class IteratorFeeder<T> extends Feeder<T> {
 
     constructor(private iterator: Iterator<T>) {
