@@ -1,5 +1,5 @@
-# rkit
-Reactive toolkit
+# rxkit
+A lightweight, no dependency component kit for reactive programming
 
 ## Basic concept
 

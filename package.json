@@ -1,7 +1,7 @@
 {
-  "name": "rkit",
+  "name": "rxkit",
   "version": "0.1.0",
-  "description": "Reactive toolkit",
+  "description": "A lightweight, no dependency component kit for reactive programming",
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --verbose",
