@@ -1,6 +1,18 @@
 import { setTimeout } from "timers/promises";
 import { IteratorFeeder, WritableConsumer } from "../src";
-import { PassThrough } from "stream";
+import { PassThrough, Writable } from "stream";
+
+class writableWithErroCb {
+
+	writable = true;
+
+	static writeError = new Error('boo');
+
+	write(_chunk: any, callback: ((error: Error | null | undefined) => void)): boolean {
+		callback(writableWithErroCb.writeError);
+		return true;
+	}
+}
 
 describe('WritableConsumer', () => {
 
@@ -11,7 +23,8 @@ describe('WritableConsumer', () => {
 		let w = new WritableConsumer(p);
 		p.on('data', (data) => { fn(data.toString('hex')) });
 
-		new IteratorFeeder([Buffer.from([1, 2, 3]), Buffer.from([255, 254])].values()).feeds(w);
+		w.consume([Buffer.from([1, 2, 3])]);
+		new IteratorFeeder([Buffer.from([255, 254])].values()).feeds(w);
 
 		return setTimeout(100)
 			.then(() => {
@@ -27,11 +40,17 @@ describe('WritableConsumer', () => {
 
 		let w = new WritableConsumer(p);
 		p.on('data', (data) => { fn(data.toString('hex')) });
-
 		p.end();
 
+		expect(fn).toHaveBeenCalledTimes(0);
 		return expect(w.consume(Buffer.from([1, 2]))).rejects.toBe('Stream no longer writable');
-
 	});
+
+	it('Writable callback throws', () => {
+		let w = new WritableConsumer(new writableWithErroCb() as Writable);
+		return expect(w.consume(Buffer.from([1, 2]))).rejects.toBe(writableWithErroCb.writeError);
+	});
+
+
 
 });
