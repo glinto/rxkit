@@ -7,7 +7,7 @@
     "test": "jest --verbose",
     "test:coverage": "jest --coverage",
     "build": "npm t && npm run test:coverage && tsc",
-    "prepack": "npm run build",
+    "prepublishOnly": "npm run build",
     "example:logger": "tsc && node dist/examples/logger.js",
     "example:silo": "tsc && node dist/examples/silo.js",
     "example:iterator": "tsc && node dist/examples/iterator.js",
