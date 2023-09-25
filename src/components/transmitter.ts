@@ -5,7 +5,6 @@ export interface Transmission<T> {
 	c: ConsumeFunction<T>;
 }
 
-
 export abstract class TransmitterBase<T> extends Feeder<T> {
 	protected transmissions: Transmission<T>[] = [];
 
