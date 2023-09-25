@@ -3,6 +3,10 @@ import { Feeder, ConsumeFunction, PushStream } from "..";
 /**
  * The IteratorFeeder feeds data from an Iterable source. IteratorFeeders can be back pressured,
  * as with every iteration, they will wait for the previous feed to complete (resolve or reject).
+ * An IteratorFeeder can feed multiple targets, but it will still take data from one common iterator.
+ * This means, that the multiple feeds will deplete the same iterator and the target Feedables will race
+ * for the iterator source, where the quicker resolving/rejecting Feedables will get data from the source 
+ * more frequently.
  */
 export class IteratorFeeder<T> extends Feeder<T> {
 
