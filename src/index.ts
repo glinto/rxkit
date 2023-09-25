@@ -259,3 +259,4 @@ export { Transformer } from './components/transformer';
 export { Aggregator, AggregatorFunction } from './components/aggregator';
 export { ReadableFeeder } from './components/readable';
 export { WritableConsumer } from './components/writable';
+export { Transmitter, Transmission } from './components/transmitter';
