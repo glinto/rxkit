@@ -1,6 +1,6 @@
 import { setTimeout } from "timers/promises";
 import { ConsumeFunction, ReadableFeeder } from "../src";
-import { Readable } from "stream";
+import { PassThrough, Readable } from "stream";
 
 describe('ReadableFeeder', () => {
 
@@ -37,6 +37,28 @@ describe('ReadableFeeder', () => {
 		return setTimeout(100)
 			.then(() => {
 				expect(fn).toBeCalledTimes(0);
+			});
+	});
+
+	it('Lose rejected feed', () => {
+		let fn = jest.fn();
+		let c: ConsumeFunction<Buffer> = (b) => {
+			let str = b.toString('hex');
+			if (str === '414243') return Promise.reject();
+			fn(str);
+			return Promise.resolve();
+		};
+
+		let p = new PassThrough();
+		new ReadableFeeder(p).feeds(c);
+
+		p.push('ABC');
+		p.push('DE');
+
+		return setTimeout(100)
+			.then(() => {
+				expect(fn).toBeCalledTimes(1);
+				expect(fn).toHaveBeenLastCalledWith('4445');
 			});
 	});
 

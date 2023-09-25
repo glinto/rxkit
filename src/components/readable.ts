@@ -15,7 +15,10 @@ export class ReadableFeeder extends Feeder<Buffer> {
 		this.reader.on('data', (chunk) => {
 			let data = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
 			if (stream.enabled) {
-				this.next(data, c, stream);
+				this.next(data, c, stream)
+					.catch(() => {
+						// Lose the data
+					});
 			}
 			else {
 				// Lose the data
