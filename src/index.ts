@@ -262,3 +262,4 @@ export { WritableConsumer } from './components/writable';
 export { Transmitter, Transmission } from './components/transmitter';
 export { Filter } from './components/filter';
 export { ImmediateFeeder } from './components/immediate';
+export { Watchdog } from './components/watchdog';
