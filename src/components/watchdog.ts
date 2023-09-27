@@ -32,6 +32,9 @@ export class Watchdog<T> extends Feeder<T> {
 		stream.resume = () => {
 			arm();
 		};
+		stream.pause = () => {
+			clearTimeout(t);
+		};
 
 		arm();
 		return stream;

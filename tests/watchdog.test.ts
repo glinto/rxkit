@@ -82,4 +82,33 @@ describe('Watchdog', () => {
 				jest.useRealTimers();
 			});
 	});
+
+	it('Defuse trigger', () => {
+		jest.useFakeTimers();
+		let fn = jest.fn();
+		let c: ConsumeFunction<number> = (n) => {
+			fn(n);
+			return Promise.resolve();
+		};
+		let w = new Watchdog(50, 17);
+		let stream = w.feeds(c);
+
+		// Must not be called yet
+		expect(fn).toBeCalledTimes(0);
+
+		return mockTimeout(25)
+			.then(() => {
+				// Must not be called yet, because within the 50ms window 
+				expect(fn).toBeCalledTimes(0);
+				// Defuse the watchdog
+				stream.enabled = false;
+			})
+			.then(() => mockTimeout(60))
+			.then(() => {
+				// Must not be called ever, because the watchdog was defused
+				expect(fn).toBeCalledTimes(0);
+				expect(stream.enabled).toBe(false);
+				jest.useRealTimers();
+			});
+	});
 });
