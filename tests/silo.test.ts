@@ -1,5 +1,5 @@
-import { setTimeout } from "timers/promises";
 import { ConsumeFunction, Feeder, PushStream, Silo } from "../src";
+import { immediatePromise } from "./test.common";
 
 class SimpleFeeder extends Feeder<number> {
 
@@ -34,7 +34,7 @@ describe('Silo', () => {
 		f.feeds(s);
 		new SimpleFeeder(11).feeds(s);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				// Silo must not release until trigger fed
 				expect(fn).toBeCalledTimes(0);
@@ -42,7 +42,7 @@ describe('Silo', () => {
 
 				new SimpleFeeder(0).triggers(stream);
 			})
-			.then(() => setTimeout(20))
+			.then(() => immediatePromise())
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(s.store.length).toBe(0);
@@ -62,7 +62,7 @@ describe('Silo', () => {
 		f.feeds(s);
 		new SimpleFeeder(0).triggers(stream);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				// Silo attempted to release
 				expect(fn).toBeCalledTimes(1);
@@ -84,7 +84,7 @@ describe('Silo', () => {
 		f.feeds(s);
 		new SimpleFeeder(0).triggers(stream);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				// No release attempted on disabled stream
 				expect(fn).toBeCalledTimes(0);
@@ -92,7 +92,7 @@ describe('Silo', () => {
 				expect(s.store.length).toBe(2);
 				stream.enabled = true;
 			})
-			.then(() => setTimeout(20))
+			.then(() => immediatePromise())
 			.then(() => {
 				// Release attempted
 				expect(fn).toBeCalledTimes(1);
@@ -113,7 +113,7 @@ describe('Silo', () => {
 		f.feeds(s);
 		new SimpleFeeder(0).triggers(stream);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				// Silo did not attempt to release
 				expect(fn).toBeCalledTimes(0);

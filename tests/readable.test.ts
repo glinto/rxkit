@@ -1,6 +1,6 @@
-import { setTimeout } from "timers/promises";
 import { ConsumeFunction, ReadableFeeder } from "../src";
 import { PassThrough, Readable } from "stream";
+import { immediatePromise } from "./test.common";
 
 describe('ReadableFeeder', () => {
 
@@ -16,7 +16,7 @@ describe('ReadableFeeder', () => {
 		f1.feeds(c);
 		f2.feeds(c);
 
-		return setTimeout(100)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(2);
 				expect(fn).toHaveBeenNthCalledWith(1, '414243');
@@ -34,7 +34,7 @@ describe('ReadableFeeder', () => {
 
 		f1.feeds(c).enabled = false;
 
-		return setTimeout(100)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(0);
 			});
@@ -55,7 +55,7 @@ describe('ReadableFeeder', () => {
 		p.push('ABC');
 		p.push('DE');
 
-		return setTimeout(100)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toHaveBeenLastCalledWith('4445');

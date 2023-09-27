@@ -1,5 +1,5 @@
-import { setTimeout } from "timers/promises";
 import { ConsumeFunction, Feeder, PushStream, Transformer } from "../src";
+import { immediatePromise } from "./test.common";
 
 class SimpleFeeder extends Feeder<number> {
 
@@ -32,7 +32,7 @@ describe('Transformer', () => {
 		t.feeds(c);
 		new SimpleFeeder(1, fnSuccess).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toHaveBeenNthCalledWith(1, "fe");
@@ -50,7 +50,7 @@ describe('Transformer', () => {
 		t.feeds(c);
 		new SimpleFeeder([1, 2]).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toHaveBeenNthCalledWith(1, ["fe", "fd"]);
@@ -68,7 +68,7 @@ describe('Transformer', () => {
 		t.feeds(c);
 		new SimpleFeeder(1, fnSuccess, fnFail).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fnFail).toBeCalledTimes(1);
 				expect(fnSuccess).toBeCalledTimes(0);
@@ -82,7 +82,7 @@ describe('Transformer', () => {
 		const t = new Transformer((i: number) => (255 - i).toString(16));
 		new SimpleFeeder(1, fnSuccess, fnFail).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fnFail).toBeCalledTimes(1);
 				expect(fnSuccess).toBeCalledTimes(0);
@@ -100,7 +100,7 @@ describe('Transformer', () => {
 		t.feeds(c).enabled = false;
 		new SimpleFeeder(1, fnSuccess, fnFail).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fnFail).toBeCalledTimes(1);
 				expect(fnSuccess).toBeCalledTimes(0);
