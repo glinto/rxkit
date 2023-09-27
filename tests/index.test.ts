@@ -1,4 +1,4 @@
-import { setTimeout } from 'timers/promises';
+import { ConsumeFunction, Consumer, Feeder, PushStream, Silo, Transformer, Transmitter } from '../src/index';
 import { immediatePromise } from './test.common';
 
 function getResultMocks() {
@@ -54,7 +54,7 @@ describe('Simple feeder', () => {
 		const TEST_VALUE = 99;
 		const f = new SimpleFeeder(TEST_VALUE, mocks.success, mocks.failure);
 		f.feeds(c);
-		return setTimeout(10)
+		return immediatePromise()
 			.then(() => {
 				expect(mocks.output).toBeCalledTimes(1);
 				expect(mocks.output).toBeCalledWith(TEST_VALUE);
@@ -87,7 +87,7 @@ describe('Simple feeder', () => {
 		const fe = new SimpleFeeder(ERROR_VALUE, mocks.success, mocks.failure);
 		fe.feeds(c).throwsTo(handler);
 
-		return setTimeout(10)
+		return immediatePromise()
 			.then(() => {
 				expect(mocks.output).toBeCalledTimes(1);
 				expect(mocks.output).toHaveBeenCalledWith(ERROR_VALUE);
@@ -114,7 +114,7 @@ describe('Simple feeder', () => {
 		const ff = new SimpleFeeder(TEST_VALUE, mocks.success, mocks.failure);
 		ff.feeds(c);
 
-		return setTimeout(10)
+		return immediatePromise()
 			.then(() => {
 				expect(mocks.success).toBeCalledTimes(0);
 				expect(mocks.failure).toBeCalledTimes(2);
@@ -128,7 +128,7 @@ describe('Simple consumer', () => {
 		let fn = jest.fn();
 		const TEST_VALUE = 98;
 		new SimpleFeeder(TEST_VALUE).feeds(new SimpleConsumer(fn));
-		return setTimeout(50)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toBeCalledWith(TEST_VALUE);
@@ -187,7 +187,7 @@ describe('Pipes', () => {
 				fn(data);
 				return Promise.resolve();
 			});
-		return setTimeout(50)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toHaveBeenCalledWith(2000);
@@ -206,14 +206,14 @@ describe('Pipes', () => {
 				fn(data);
 				return Promise.resolve();
 			});
-		return setTimeout(50)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toHaveBeenCalledWith(55);
 			});
 	});
 
-	it('Triggering', () => {
+	it('TriggeredWith', () => {
 		let fn = jest.fn();
 		new SimpleFeeder(131)
 			.pipe(new Silo())
@@ -222,14 +222,14 @@ describe('Pipes', () => {
 				return Promise.resolve();
 			})
 			.triggeredWith(new SimpleFeeder(0))
-		return setTimeout(50)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toHaveBeenCalledWith([131]);
 			});
 	});
 
-	it('Triggering error', () => {
+	it('TriggeredWith error', () => {
 		let t = new Transformer<number, number>((i) => 255 - i);
 		let fn = jest.fn();
 		let fnerr = () => {

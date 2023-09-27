@@ -1,10 +1,5 @@
 import { ConsumeFunction, ImmediateFeeder } from "../src";
-
-function immediatePromsise() {
-	return new Promise<void>(r => {
-		setImmediate(() => r())
-	});
-}
+import { immediatePromise } from "./test.common";
 
 describe('ImmediateFeeder', () => {
 
@@ -21,7 +16,7 @@ describe('ImmediateFeeder', () => {
 		// Must not be called yet
 		expect(fn).toBeCalledTimes(0);
 
-		return immediatePromsise()
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(1);
 				expect(fn).toHaveBeenNthCalledWith(1, [1, 2]);

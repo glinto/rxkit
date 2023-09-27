@@ -1,5 +1,5 @@
-import { setTimeout } from "timers/promises";
 import { ConsumeFunction, Feeder, PushStream, Transmitter } from "../src";
+import { immediatePromise } from "./test.common";
 
 class SimpleFeeder extends Feeder<number> {
 
@@ -35,7 +35,7 @@ describe('Transmitter', () => {
 
 		new SimpleFeeder(13).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(2);
 				expect(fn).toHaveBeenNthCalledWith(1, 13);
@@ -50,7 +50,7 @@ describe('Transmitter', () => {
 
 		new SimpleFeeder(13, fnsuccess, fnfail).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fnsuccess).toBeCalledTimes(0);
 				expect(fnfail).toBeCalledTimes(1);
@@ -71,7 +71,7 @@ describe('Transmitter', () => {
 
 		new SimpleFeeder(13, undefined, fnfail).feeds(t);
 
-		return setTimeout(20)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(0);
 				expect(fnfail).toBeCalledTimes(1);

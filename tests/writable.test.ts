@@ -1,6 +1,6 @@
-import { setTimeout } from "timers/promises";
 import { IteratorFeeder, WritableConsumer } from "../src";
 import { PassThrough, Writable } from "stream";
+import { immediatePromise } from "./test.common";
 
 class writableWithErroCb {
 
@@ -26,7 +26,7 @@ describe('WritableConsumer', () => {
 		w.consume([Buffer.from([1, 2, 3])]);
 		new IteratorFeeder([Buffer.from([255, 254])].values()).feeds(w);
 
-		return setTimeout(100)
+		return immediatePromise()
 			.then(() => {
 				expect(fn).toBeCalledTimes(2);
 				expect(fn).toHaveBeenNthCalledWith(1, '010203');
