@@ -77,6 +77,11 @@ export class PushStream {
 	resume?: () => void = undefined;
 
 	/**
+	 * If defined, this method will be called everytime a PushStream enabled state is changed from true to false
+	 */
+	pause?: () => void = undefined;
+
+	/**
 	 * An optional Feedable endpoint which will trigger the stream when it is fed to.
 	 */
 	trigger?: ConsumeFunction<any>;
@@ -91,9 +96,13 @@ export class PushStream {
 	}
 
 	set enabled(b: boolean) {
-		if (!this._enabled && b && this.resume) {
+		if (!this._enabled && b && this.resume !== undefined) {
 			this._enabled = b;
 			this.resume();
+		}
+		else if (this._enabled && !b && this.pause !== undefined) {
+			this._enabled = b;
+			this.pause();
 		}
 		else {
 			this._enabled = b;
