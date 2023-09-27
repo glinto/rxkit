@@ -11,7 +11,11 @@ export class ImmediateFeeder<T> extends Feeder<T> {
 
 	protected override setupFeed(c: ConsumeFunction<T>): PushStream {
 		let stream = new PushStream();
-		setImmediate(() => this.next(this.data, c, stream));
+		setImmediate(() => this.next(this.data, c, stream)
+			.catch(() => {
+				// Ignore rejections
+			})
+		);
 		return stream;
 	}
 

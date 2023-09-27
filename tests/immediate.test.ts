@@ -22,4 +22,25 @@ describe('ImmediateFeeder', () => {
 				expect(fn).toHaveBeenNthCalledWith(1, [1, 2]);
 			});
 	});
+
+	it('Reject', () => {
+		let fn = jest.fn();
+
+		let c: ConsumeFunction<number> = (n) => {
+			if (n === 1) return Promise.reject(n);
+			fn(n);
+			return Promise.resolve();
+		};
+
+		// Will be discarded
+		new ImmediateFeeder(1).feeds(c);
+		new ImmediateFeeder(13).feeds(c);
+
+		return immediatePromise()
+			.then(() => {
+				expect(fn).toBeCalledTimes(1);
+				expect(fn).toHaveBeenLastCalledWith(13);
+			});
+	});
+
 });
