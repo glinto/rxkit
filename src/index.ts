@@ -220,11 +220,25 @@ export class Pipe<I, O> {
 	 * Stream the output of the pipe to a Feedable target.
 	 * 
 	 * @param target The target to feed to pipe output to
-	 * @returns The pipe itself for chaining purposes
+	 * @returns The pipe itself for chaining purposes, where the last stream in the pipe is the new
+	 * PushStream to the target
 	 */
 	out(target: Feedable<O>): this {
 		this.stream = this.feeder.feeds(target);
 		return this;
+	}
+
+	/**
+	 * Stream the output of the pipe to a another PushStream's trigger point.
+	 * 
+	 * @param target The target stream to be triggered
+	 * @returns The pipe itself for chaining purposes, where the last stream in the pipe is the new
+	 * PushStream to the target
+	 */
+	triggers(stream: PushStream): this {
+		if (stream.trigger === undefined)
+			throw (`${this.constructor.name}: PushStream is not triggerable`);
+		return this.out(stream.trigger);
 	}
 
 	/**

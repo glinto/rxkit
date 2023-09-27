@@ -1,5 +1,5 @@
 import { setTimeout } from 'timers/promises';
-import { ConsumeFunction, Consumer, Feeder, PushStream, Silo, Transformer } from '../src/index';
+import { immediatePromise } from './test.common';
 
 function getResultMocks() {
 	return {
@@ -242,6 +242,37 @@ describe('Pipes', () => {
 				.triggeredWith(new SimpleFeeder(0))
 		};
 		expect(fnerr).toThrow('Stream is not triggerable');
+	});
+
+	it('Triggers', () => {
+		let fn = jest.fn();
+
+		let stream = new PushStream();
+		stream.trigger = (data: number | number[]) => {
+			fn(data);
+			return Promise.resolve();
+		};
+
+		new SimpleFeeder(13)
+			.pipe(new Transmitter())
+			.triggers(stream);
+
+		return immediatePromise()
+			.then(() => {
+				expect(fn).toBeCalledTimes(1);
+				expect(fn).toHaveBeenCalledWith(13);
+			});
+	});
+
+	it('Triggers error', () => {
+		let stream = new PushStream();
+
+		expect(() => {
+			new SimpleFeeder(13)
+				.pipe(new Transmitter())
+				.triggers(stream);
+		}).toThrow('PushStream is not triggerable');
+
 	});
 
 });
