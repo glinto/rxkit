@@ -156,6 +156,22 @@ describe('PushStream', () => {
 		p.enabled = true;
 		expect(fn).toBeCalledTimes(1);
 	});
+	it('Pause', () => {
+		const fn = jest.fn();
+		let p = new PushStream();
+		p.pause = () => {
+			fn();
+		};
+		expect(p.enabled).toBe(true);
+		p.enabled = true;
+		expect(fn).toBeCalledTimes(0);
+		p.enabled = false;
+		expect(fn).toBeCalledTimes(1);
+		p.enabled = false;
+		expect(fn).toBeCalledTimes(1);
+		p.enabled = true;
+		expect(fn).toBeCalledTimes(1);
+	});
 	it('Trigger', () => {
 		let p = new PushStream();
 		let f = new SimpleFeeder(1);
