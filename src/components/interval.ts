@@ -24,7 +24,7 @@ export interface IntervalFeederOptions {
  */
 export class IntervalFeeder extends Feeder<number> {
 
-	private intervals: NodeJS.Timer[] = [];
+	private intervals: NodeJS.Timeout[] = [];
 
 	constructor(protected options?: IntervalFeederOptions) {
 		super();

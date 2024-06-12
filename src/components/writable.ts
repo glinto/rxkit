@@ -1,12 +1,16 @@
-import { Writable } from "stream";
 import { ConsumeFunction, ConsumerBehavior } from "..";
+
+export interface WritableLike {
+	write(chunk: any, callback?: ((error: Error | null | undefined) => void) | undefined): boolean;
+	readonly writable: boolean;
+}
 
 /**
  * A WrtiableConsumer consumes binary data and pushes it to a writable stream.
  */
-export class WritableConsumer implements ConsumerBehavior<Buffer>{
+export class WritableConsumer implements ConsumerBehavior<Buffer> {
 
-	constructor(private writable: Writable) {
+	constructor(private writable: WritableLike) {
 
 	}
 
