@@ -1,12 +1,15 @@
-import { Readable } from "stream";
 import { Feeder, ConsumeFunction, PushStream } from "..";
+
+interface ReadableLike {
+	on(event: "data", listener: (chunk: any) => void): ReadableLike;
+}
 
 /**
  * A ReadableFeeder feeds byte data arriving from a Readble stream.
  */
 export class ReadableFeeder extends Feeder<Buffer> {
 
-	constructor(private reader: Readable) {
+	constructor(private reader: ReadableLike) {
 		super();
 	}
 
